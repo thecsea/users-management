@@ -1,0 +1,28 @@
+{
+  "name": "thecsea/usersManagement",
+  "type": "library",
+  "description": "description_text",
+  "homepage": "http://www.thecsea.it",
+  "minimum-stability": "stable",
+  "license": "GPL-2.0",
+  "authors": [
+    {
+      "name": "claudio cardinale",
+      "email": "cardi@thecsea.it",
+      "homepage": "http://thecsea.it"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "thecsea/mysqltcs": "3.0.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.7.*",
+    "phpdocumentor/phpdocumentor": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "it\\thecsea\\usersManagement\\": "src/"
+    }
+  }
+}
