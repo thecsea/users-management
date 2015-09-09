@@ -7,10 +7,10 @@ build:
         php: '5.5.0'
     dependencies:
         before:
-            - mysql -uroot -e "create database IF NOT EXISTS mysqltcs;"
-            - mysql -uroot -e "CREATE USER 'mysqltcs'@'localhost' IDENTIFIED BY 'zhhnqBF26wtnUnP9';"
-            - mysql -uroot -e "GRANT ALL ON mysqltcs.* TO 'mysqltcs'@'localhost';"
-            - mysql -uroot mysqltcs < tests/usersManagement.sql
+            - mysql -uroot -e "create database IF NOT EXISTS users_management;"
+            - mysql -uroot -e "CREATE USER 'users_management'@'localhost' IDENTIFIED BY 'zhhnqBF26wtnUnP9';"
+            - mysql -uroot -e "GRANT ALL ON users_management.* TO 'users_management'@'localhost';"
+            - mysql -uroot users_management < tests/users_management.sql
     tests:
         override:
             -
