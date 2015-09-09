@@ -22,7 +22,7 @@ before_script:
   - if [[ "$DB" == "mysql" ]]; then mysql -e "create database IF NOT EXISTS users_management;" -uroot; fi
   - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE USER 'users_management'@'localhost' IDENTIFIED BY 'zhhnqBF26wtnUnP9';" -uroot; fi
   - if [[ "$DB" == "mysql" ]]; then mysql -e "GRANT ALL ON users_management.* TO 'users_management'@'localhost';" -uroot; fi
-  - if [[ "$DB" == "mysql" ]]; then mysql -uroot users_management < tests/users_management.sql; fi
+  - if [[ "$DB" == "mysql" ]]; then mysql -uroot users_management < tests/usersManagement.sql; fi
 
 # Commands you want to run that will verify your build.
 script: phpunit
