@@ -24,7 +24,7 @@ use it\thecsea\mysqltcs\Mysqltcs;
 require_once(__DIR__."/../vendor/autoload.php");
 
 /**
- * Class Test
+ * Class GeneralTest
  * @author Claudio Cardinale <cardi@thecsea.it>
  * @copyright 2015 Claudio Cardinale
  * @version 1.0.0

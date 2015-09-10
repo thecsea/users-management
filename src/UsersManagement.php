@@ -43,6 +43,11 @@ class UsersManagement
     private $usersTable;
 
     /**
+     * @var MysqltcsOperations
+     */
+    private $operations;
+
+    /**
      * @param Mysqltcs $connection a valid and connected instance of Mysqltcs
      * @param String $usersTable users table name
      * @throws UsersManagementException on connection errors
@@ -54,6 +59,7 @@ class UsersManagement
 
         self::connectionCheck($connection);
         self::usersTableCheck($connection, $usersTable);
+        $this->operations = new MysqltcsOperations($connection, $usersTable);
     }
 
     /**
@@ -117,6 +123,17 @@ class UsersManagement
     }
 
     /**
+     * getOperations with clone
+     * @return MysqltcsOperations
+     */
+    public function getOperations()
+    {
+        //clone to avoid to modify original operations
+        $ret = clone $this->operations;
+        return $ret;
+    }
+
+    /**
      * @return String
      */
     public function getUsersTable()
@@ -131,6 +148,7 @@ class UsersManagement
     {
         $this->connection = $connection;
         self::connectionCheck($connection);
+        $this->operations->setMysqltcs($connection);
     }
 
     /**
@@ -140,6 +158,47 @@ class UsersManagement
     {
         $this->usersTable = $usersTable;
         self::usersTableCheck($this->connection, $usersTable);
+        $this->operations->setDefaultFrom($usersTable);
     }
 
+
+    /**
+     * Return an unique apiKey
+     * @return string
+     */
+    public function createApiKey()
+    {
+        do{
+            $key = md5(rand());
+        }while($this->operations->getValue("id","api_key = '$key'"));
+        return $key;
+    }
+
+    /**
+     * get id by apiKey
+     * @param string $apiKey
+     * @return null|int id
+     */
+    public function getIdByApiKey($apiKey)
+    {
+        //sql check
+        $apiKey = $this->connection->getEscapedString($apiKey);
+
+        //get id and return
+        return $this->operations->getValue("id", "api_key = '$apiKey'");
+    }
+
+    /**
+     * get id by email
+     * @param string $email
+     * @return null|int id
+     */
+    public function getIdByEmail($email)
+    {
+        //sql check
+        $email = $this->connection->getEscapedString($email);
+
+        //get id and return
+        return $this->operations->getValue("id", "email = '$email'");
+    }
 }
