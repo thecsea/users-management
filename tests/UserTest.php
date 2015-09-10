@@ -38,9 +38,34 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
         $usersManagement = new UsersManagement($connection, $db['tables']['users']);
         $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
-        //$id = $user->getId();
+        $id = $user->getId();
         $data = $user->getUserInfo();
         $this->assertEquals($data['name'],"t");
+        $user2 = User::getUserById($usersManagement, $id);
+        $data = $user2->getUserInfo();
+        $this->assertEquals($data['name'],"t");
+        $user2 = User::getUserByEmail($usersManagement, $data['email']);
+        $data = $user2->getUserInfo();
+        $this->assertEquals($data['name'],"t");
+        $user2 = User::getUserByApiKey($usersManagement, $data['api_key']);
+        $data = $user2->getUserInfo();
+        $this->assertEquals($data['name'],"t");
         $user->removeUser();
+        $thrown = false;
+        try{
+            $user->getId();
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        $thrown = false;
+        try{
+            $user2->getId();
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
     }
 }

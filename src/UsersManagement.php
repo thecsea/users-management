@@ -144,7 +144,7 @@ class UsersManagement
     /**
      * @param Mysqltcs $connection
      */
-    public function setConnection($connection)
+    public function setConnection(Mysqltcs $connection)
     {
         $this->connection = $connection;
         self::connectionCheck($connection);

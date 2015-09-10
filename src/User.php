@@ -43,7 +43,55 @@ class User
      * @param UsersManagement $usersManagement
      */
     private function __construct(UsersManagement $usersManagement){
+        self::usersManagementCheck($usersManagement);
         $this->usersManagement = $usersManagement;
+    }
+
+    /**
+     * getUsersManagement with clone
+     * @return UsersManagement
+     */
+    public function getUsersManagement()
+    {
+        //clone to avoid to modify original operations
+        $ret = clone $this->usersManagement;
+        return $ret;
+    }
+
+    /**
+     * @param UsersManagement $usersManagement
+     */
+    public function setUsersManagement(UsersManagement $usersManagement)
+    {
+        self::usersManagementCheck($usersManagement);
+        $this->usersManagement = $usersManagement;
+    }
+
+    /**
+     * @return string
+     */
+    function __toString()
+    {
+        return ("id: ".$this->id. "\nusersManagement: \n".(string)$this->usersManagement);
+    }
+
+    /**
+     * This entails that you can clone every instance of this class
+     */
+    public function __clone()
+    {
+    }
+
+    /**
+     * throw exception if usersManagement passed is not valid
+     * @param UsersManagement $usersManagement
+     * @throws UsersManagementException
+     */
+    private static function usersManagementCheck(UsersManagement $usersManagement)
+    {
+        if($usersManagement == null || !($usersManagement instanceof UsersManagement)) {
+            throw new UsersManagementException("usersManagement passed is not an instance of UsersManagement");
+        }
     }
 
     /**
@@ -131,14 +179,21 @@ class User
         $apiKey = $usersManagement->getConnection()->getEscapedString($apiKey);
 
         //check email
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new UsersManagementException("Email is not valid");
+        }
 
         //check empty api_key
-        if($apiKey == "")
+        if($apiKey == "") {
             $apiKey = $usersManagement->createApiKey();
-        else if(strlen($apiKey) != 32)
+        }else if(strlen($apiKey) != 32) {
             throw new UsersManagementException("Api key is not valid (length)");
+        }
+
+        //check if user already exists
+        if($usersManagement->getOperations()->getValue("id", "email = '$email' OR api_key = '$apiKey'")) {
+            throw new UsersManagementException("User already exists");
+        }
 
         //insert data
         try {
