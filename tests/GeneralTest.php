@@ -88,6 +88,14 @@ class GeneralTest extends \PHPUnit_Framework_TestCase
             $thrown = true;
         }
         $this->assertTrue($thrown);
+        $thrown = false;
+        try {
+            $usersManagement->setUsersTable($db['tables']['users']);
+        } catch (UsersManagementException $e) {
+            $thrown = true;
+        }
+        $this->assertFalse($thrown);
+        $this->assertEquals($db['tables']['users'], $usersManagement->getUsersTable());
     }
 
     public function testClone()
