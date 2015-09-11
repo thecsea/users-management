@@ -104,6 +104,7 @@ class UsersManagement
      */
     public function __clone()
     {
+        $this->operations = clone $this->operations;
     }
 
     /**

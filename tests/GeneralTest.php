@@ -95,6 +95,10 @@ class GeneralTest extends \PHPUnit_Framework_TestCase
         $db = require(__DIR__."/config.php");
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
         $connection2 = clone $connection;
-        $this->assertNotEquals($connection, $connection2);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $usersManagement2 = clone $usersManagement;
+        $this->assertEquals($usersManagement, $usersManagement2);
+        $usersManagement2->setConnection($connection2);
+        $this->assertNotEquals($usersManagement, $usersManagement2);
     }
 }

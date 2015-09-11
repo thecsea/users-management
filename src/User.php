@@ -72,7 +72,11 @@ class User
      */
     function __toString()
     {
-        return ("id: ".$this->id. "\nusersManagement: \n".(string)$this->usersManagement);
+        $data = $this->getUserInfo();
+        $ret = "";
+        foreach($data as $key=>$value)
+            $ret .= "$key: $value\n";
+        return $ret;
     }
 
     /**
