@@ -68,4 +68,46 @@ class UserTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertTrue($thrown);
     }
+
+    public function testNewUser()
+    {
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $thrown = false;
+        try{
+            User::newUser($usersManagement, "t", "tthhh.it", "gggg");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        $thrown = false;
+        try{
+            User::newUser($usersManagement, "t", "tt@hhh.it", "gggg","t");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        $thrown = false;
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
+        try{
+            User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $user->removeUser();
+        $this->assertTrue($thrown);
+        $thrown = false;
+        try{
+            User::newUser($usersManagement, str_pad("", 256, "x"), "tt@hhh.it", "gggg");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+
+    }
 }

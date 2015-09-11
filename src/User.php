@@ -182,6 +182,11 @@ class User
         $password = $usersManagement->getConnection()->getEscapedString($password);
         $apiKey = $usersManagement->getConnection()->getEscapedString($apiKey);
 
+        //check length
+        if(strlen($name)>255 || strlen($email)>255){
+            throw new UsersManagementException("A field exceeds the maximum length");
+        }
+
         //check email
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new UsersManagementException("Email is not valid");
