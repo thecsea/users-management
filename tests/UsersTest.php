@@ -19,6 +19,7 @@
 
 namespace it\thecsea\users_management;
 
+use it\thecsea\mysqltcs\Mysqltcs;
 
 require_once(__DIR__."/../vendor/autoload.php");
 
@@ -31,8 +32,25 @@ require_once(__DIR__."/../vendor/autoload.php");
  */
 class UsersTest extends \PHPUnit_Framework_TestCase
 {
-    public  function testEmpty()
+    public  function testGetUsers()
     {
-
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
+        $user2 = User::newUser($usersManagement, "t", "tt@hhht.it", "gggg");
+        $users = $usersManagement->getUsers();
+        $data1= $users[0]->getUserInfo();
+        if($data1['id'] == $user->getId())
+        {
+            $this->assertEquals($user->getUserInfo(),$users[0]->getUserInfo());
+            $this->assertEquals($user2->getUserInfo(),$users[1]->getUserInfo());
+        }else
+        {
+            $this->assertEquals($user->getUserInfo(),$users[1]->getUserInfo());
+            $this->assertEquals($user2->getUserInfo(),$users[0]->getUserInfo());
+        }
+        $user->removeUser();
+        $user2->removeUser();
     }
 }

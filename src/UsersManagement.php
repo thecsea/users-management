@@ -202,4 +202,18 @@ class UsersManagement
         //get id and return
         return $this->operations->getValue("id", "email = '$email'");
     }
+
+    /**
+     * Get a list (array) of User instances, all users are taken. The list is not ordered
+     * @return User[]
+     */
+    public function getUsers()
+    {
+        $usersDb = $this->operations->getList("id", "1");
+        /* @var $users User[] */
+        $users = array();
+        foreach($usersDb as $value)
+            $users[] = User::getUserById($this, $value['id']);
+        return $users;
+    }
 }
