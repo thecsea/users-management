@@ -205,12 +205,12 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
         $usersManagement = new UsersManagement($connection, $db['tables']['users']);
         $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");;
-        $this->assertTrue($user->checkPassword("gggg"));
-        $this->assertFalse($user->checkPassword("ggkg"));
+        $this->assertTrue($user->checkCorrectPassword("gggg"));
+        $this->assertFalse($user->checkCorrectPassword("ggkg"));
         $dataO = $user->getUserInfo();
         $user->updatePassword("ggkg");
-        $this->assertFalse($user->checkPassword("gggg"));
-        $this->assertTrue($user->checkPassword("ggkg"));
+        $this->assertFalse($user->checkCorrectPassword("gggg"));
+        $this->assertTrue($user->checkCorrectPassword("ggkg"));
         $this->assertEquals($dataO, $user->getUserInfo());
         $user->removeUser();
     }

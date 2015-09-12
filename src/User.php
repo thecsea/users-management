@@ -158,7 +158,7 @@ class User
     public static function getUserByLogin(UsersManagement $usersManagement, $email, $password)
     {
         $user = self::getUserByEmail($usersManagement, $email);
-        if(!$user->checkPassword($password))
+        if(!$user->checkCorrectPassword($password))
             throw new UsersManagementException("Password is not correct");
         return $user;
     }
@@ -341,11 +341,7 @@ class User
         $this->checkUser();
         $name = $this->usersManagement->getOperations()->getEscapedString($name);
         self::checkName($name);
-        try{
-            $this->usersManagement->getOperations()->update(array("name"=>"'$name'"), "id = ".$this->id);
-        }catch(MysqltcsException $e){
-            throw new UsersManagementException("Mysql error during  updateName, please take a look to exception cause",0, $e);
-        }
+        $this->update("name", $name);
     }
 
     /**
@@ -358,11 +354,7 @@ class User
         $this->checkUser();
         $email = $this->usersManagement->getOperations()->getEscapedString($email);
         self::checkEmail($this->usersManagement, $email);
-        try{
-            $this->usersManagement->getOperations()->update(array("email"=>"'$email'"), "id = ".$this->id);
-        }catch(MysqltcsException $e){
-            throw new UsersManagementException("Mysql error during  updateEmail , please take a look to exception cause",0, $e);
-        }
+        $this->update("email", $email);
     }
 
     /**
@@ -374,11 +366,7 @@ class User
     {
         $this->checkUser();
         $password = $this->usersManagement->getOperations()->getEscapedString($password);
-        try{
-            $this->usersManagement->getOperations()->update(array("password"=>"'".md5($password)."'"), "id = ".$this->id);
-        }catch(MysqltcsException $e){
-            throw new UsersManagementException("Mysql error during  updateEmail , please take a look to exception cause",0, $e);
-        }
+        $this->update("password", md5($password));
     }
 
     /**
@@ -390,11 +378,22 @@ class User
     {
         $this->checkUser();
         $apiKey = $this->usersManagement->getOperations()->getEscapedString($apiKey);
-        self::checkApiKey($this->usersManagement, $apiKey);
+        $apiKey = self::checkApiKey($this->usersManagement, $apiKey);
+        $this->update("api_key", $apiKey);
+    }
+
+    /**
+     * update a field of the current user
+     * @param string $field field name
+     * @param string $value field value
+     * @throws UsersManagementException when an update error is occurred
+     */
+    private function update($field, $value)
+    {
         try{
-            $this->usersManagement->getOperations()->update(array("api_key"=>"'$apiKey'"), "id = ".$this->id);
+            $this->usersManagement->getOperations()->update(array("$field"=>"'$value'"), "id = ".$this->id);
         }catch(MysqltcsException $e){
-            throw new UsersManagementException("Mysql error during  updateApiKey , please take a look to exception cause",0, $e);
+            throw new UsersManagementException("Mysql error during update $field, please take a look to exception cause",0, $e);
         }
     }
 
@@ -405,7 +404,7 @@ class User
      * @return bool true if the password is correct, else false
      * @throws UsersManagementException when user is not valid
      */
-    public function checkPassword($password)
+    public function checkCorrectPassword($password)
     {
         $this->checkUser();
         $password = $this->usersManagement->getOperations()->getEscapedString($password);
