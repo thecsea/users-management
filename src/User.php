@@ -182,27 +182,9 @@ class User
         $password = $usersManagement->getConnection()->getEscapedString($password);
         $apiKey = $usersManagement->getConnection()->getEscapedString($apiKey);
 
-        //check length
-        if(strlen($name)>255 || strlen($email)>255){
-            throw new UsersManagementException("A field exceeds the maximum length");
-        }
-
-        //check email
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new UsersManagementException("Email is not valid");
-        }
-
-        //check empty api_key
-        if($apiKey == "") {
-            $apiKey = $usersManagement->createApiKey();
-        }else if(strlen($apiKey) != 32) {
-            throw new UsersManagementException("Api key is not valid (length)");
-        }
-
-        //check if user already exists
-        if($usersManagement->getOperations()->getValue("id", "email = '$email' OR api_key = '$apiKey'")) {
-            throw new UsersManagementException("User already exists");
-        }
+        self::checkName($name);
+        self::checkEmail($usersManagement, $email);
+        $apiKey = self::checkApiKey($usersManagement, $apiKey);
 
         //insert data
         try {
@@ -213,6 +195,53 @@ class User
 
         //return user id
         return $usersManagement->getConnection()->getLastId();
+    }
+
+    /**
+     * @param string $name
+     * @throws UsersManagementException error description
+     */
+    private static function checkName( $name)
+    {
+        if(strlen($name)>255){
+            throw new UsersManagementException("Name exceeds the maximum length (255)");
+        }
+    }
+
+    /**
+     * @param UsersManagement $usersManagement
+     * @param string $email
+     * @throws UsersManagementException error description
+     */
+    private static function checkEmail(UsersManagement $usersManagement, $email)
+    {
+        if(strlen($email)>255){
+            throw new UsersManagementException("Email exceeds the maximum length (255)");
+        }else if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new UsersManagementException("Email is not valid");
+        }else if($usersManagement->getOperations()->getValue("id", "email = '$email'")) {
+            throw new UsersManagementException("User already exists");
+        }
+    }
+
+    /**
+     * Check apiKey and return it or an unique random apiKey if the apiKey passed is empty
+     * @param UsersManagement $usersManagement
+     * @param string $apiKey
+     * @return string unique random apiKey if $apiKey is empty
+     * @throws UsersManagementException error description
+     */
+    private static function checkApiKey(UsersManagement $usersManagement, $apiKey = "")
+    {
+        if($apiKey == "") {
+           return $usersManagement->createApiKey();
+        }else if(strlen($apiKey) != 32) {
+            throw new UsersManagementException("ApiKey's length is not correct (32 is the correct length)");
+        }else if($usersManagement->getOperations()->getValue("id", "api_key = '$apiKey'")) {
+            throw new UsersManagementException("ApiKey chosen is already taken");
+        }
+
+        return $apiKey;
     }
 
     /**

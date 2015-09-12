@@ -108,6 +108,35 @@ class UserTest extends \PHPUnit_Framework_TestCase
             $thrown = true;
         }
         $this->assertTrue($thrown);
-
+        $thrown = false;
+        try{
+            User::newUser($usersManagement, "t", str_pad("", 256, "x"), "gggg");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
+        //correct apiKey
+        $thrown = false;
+        try{
+            $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", md5(rand()));
+            $user->removeUser();
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertFalse($thrown);
+        //apiKey already taken
+        $thrown = false;
+        $apiKey = md5(rand());
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", $apiKey);
+        try{
+            User::newUser($usersManagement, "t", "tt@hhh.it2", "gggg", $apiKey);
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $user->removeUser();
+        $this->assertTrue($thrown);
     }
 }
