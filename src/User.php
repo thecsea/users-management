@@ -110,7 +110,7 @@ class User
     /**
      * @param UsersManagement $usersManagement
      * @param int|null $id
-     * @return User
+     * @return User instance of the user
      * @throws UsersManagementException
      */
     public static function getUserById(UsersManagement $usersManagement, $id)
@@ -126,7 +126,7 @@ class User
     /**
      * @param UsersManagement $usersManagement
      * @param string $apiKey
-     * @return User
+     * @return User instance of the user
      * @throws UsersManagementException
      */
     public static function getUserByApiKey(UsersManagement $usersManagement, $apiKey)
@@ -138,7 +138,7 @@ class User
     /**
      * @param UsersManagement $usersManagement
      * @param string $email
-     * @return User
+     * @return User instance of the user
      * @throws UsersManagementException
      */
     public static function getUserByEmail(UsersManagement $usersManagement, $email)
@@ -147,7 +147,22 @@ class User
         return self::getUserById($usersManagement, $id);
     }
 
-    //
+    /**
+     * Get user by email checking the password, if the password is not correct an exception is thrown
+     * @param UsersManagement $usersManagement
+     * @param string $email
+     * @param string $password
+     * @return User instance of the user
+     * @throws UsersManagementException
+     */
+    public static function getUserByLogin(UsersManagement $usersManagement, $email, $password)
+    {
+        $user = self::getUserByEmail($usersManagement, $email);
+        if(!$user->checkPassword($password))
+            throw new UsersManagementException("Password is not correct");
+        return $user;
+    }
+
     /**
      * insert a new user in db and return it
      * @param UsersManagement $usersManagement
@@ -155,7 +170,7 @@ class User
      * @param String $email
      * @param String $password
      * @param String $apiKey
-     * @return User
+     * @return User instance of the user
      * @throws UsersManagementException when user data are not corrected
      */
     public static function newUser(UsersManagement $usersManagement, $name, $email, $password, $apiKey = "")
@@ -190,7 +205,7 @@ class User
         try {
             $usersManagement->getOperations()->insert("name, email, password, api_key", "'$name', '$email', '" . md5($password) . "', '$apiKey'");
         }catch(MysqltcsException $e){
-            throw new UsersManagementException("User data are not corrected, user is not created",0, $e);
+            throw new UsersManagementException("Mysql error during insert, please take a look to exception cause",0, $e);
         }
 
         //return user id
@@ -307,7 +322,7 @@ class User
     }
 
     /**
-     * if user is not valid throw an exception
+     * if user is not valid throw an exception. IMPORTANT this method must be called at the start of every public method
      * @throws UsersManagementException when user is not valid
      */
     private function checkUser()
@@ -316,4 +331,88 @@ class User
             throw new UsersManagementException("User is not valid");
     }
 
+    /**
+     * update name
+     * @param string $name
+     * @throws UsersManagementException when name is not valid or user is not valid
+     */
+    public function updateName($name)
+    {
+        $this->checkUser();
+        $name = $this->usersManagement->getOperations()->getEscapedString($name);
+        self::checkName($name);
+        try{
+            $this->usersManagement->getOperations()->update(array("name"=>"'$name'"), "id = ".$this->id);
+        }catch(MysqltcsException $e){
+            throw new UsersManagementException("Mysql error during  updateName, please take a look to exception cause",0, $e);
+        }
+    }
+
+    /**
+     * update email
+     * @param string $email
+     * @throws UsersManagementException when email is not valid or user is not valid
+     */
+    public function updateEmail($email)
+    {
+        $this->checkUser();
+        $email = $this->usersManagement->getOperations()->getEscapedString($email);
+        self::checkEmail($this->usersManagement, $email);
+        try{
+            $this->usersManagement->getOperations()->update(array("email"=>"'$email'"), "id = ".$this->id);
+        }catch(MysqltcsException $e){
+            throw new UsersManagementException("Mysql error during  updateEmail , please take a look to exception cause",0, $e);
+        }
+    }
+
+    /**
+     * Update password. CAUTION: the method already makes the md5 hash
+     * @param string $password unencrypted password
+     * @throws UsersManagementException when password is not valid or user is not valid
+     */
+    public function updatePassword($password)
+    {
+        $this->checkUser();
+        $password = $this->usersManagement->getOperations()->getEscapedString($password);
+        try{
+            $this->usersManagement->getOperations()->update(array("password"=>"'".md5($password)."'"), "id = ".$this->id);
+        }catch(MysqltcsException $e){
+            throw new UsersManagementException("Mysql error during  updateEmail , please take a look to exception cause",0, $e);
+        }
+    }
+
+    /**
+     * update apiKey
+     * @param string $apiKey
+     * @throws UsersManagementException when apiKey is not valid or user is not valid
+     */
+    public function updateApiKey($apiKey)
+    {
+        $this->checkUser();
+        $apiKey = $this->usersManagement->getOperations()->getEscapedString($apiKey);
+        self::checkApiKey($this->usersManagement, $apiKey);
+        try{
+            $this->usersManagement->getOperations()->update(array("api_key"=>"'$apiKey'"), "id = ".$this->id);
+        }catch(MysqltcsException $e){
+            throw new UsersManagementException("Mysql error during  updateApiKey , please take a look to exception cause",0, $e);
+        }
+    }
+
+
+    /**
+     * Check if the password passed is correct. CAUTION: the method already makes the md5 hash
+     * @param string $password unencrypted password
+     * @return bool true if the password is correct, else false
+     * @throws UsersManagementException when user is not valid
+     */
+    public function checkPassword($password)
+    {
+        $this->checkUser();
+        $password = $this->usersManagement->getOperations()->getEscapedString($password);
+        $passwordDb = $this->usersManagement->getOperations()->getValue("password", "id = ".$this->id);
+        if($passwordDb == md5($password))
+            return true;
+        else
+            return false;
+    }
 }

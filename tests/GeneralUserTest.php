@@ -78,6 +78,7 @@ class GeneralUserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($user, $user2);
         $user2->setUsersManagement($usersManagement2);
         $this->assertNotEquals($user, $user2);
+        $this->assertEquals($user->getUserInfo(), $user2->getUserInfo());
         $user->removeUser();
     }
 }

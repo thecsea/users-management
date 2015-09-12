@@ -42,15 +42,29 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $data = $user->getUserInfo();
         $this->assertEquals($data['name'],"t");
         $user2 = User::getUserById($usersManagement, $id);
-        $data = $user2->getUserInfo();
-        $this->assertEquals($data['name'],"t");
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals($data,$data2);
         $user2 = User::getUserByEmail($usersManagement, $data['email']);
-        $data = $user2->getUserInfo();
-        $this->assertEquals($data['name'],"t");
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals($data,$data2);
         $user2 = User::getUserByApiKey($usersManagement, $data['api_key']);
         $data = $user2->getUserInfo();
-        $this->assertEquals($data['name'],"t");
+        $this->assertEquals($data,$data2);
+        $this->assertEquals($data['password'],"");
+        $user2 = User::getUserByLogin($usersManagement, $data['email'], "gggg");
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals($data, $data2);
+        //password error
+        $thrown = false;
+        try{
+            User::getUserByLogin($usersManagement, $data['email'], "gghgg");
+        }catch(UsersManagementException $e)
+        {
+            $thrown = true;
+        }
+        $this->assertTrue($thrown);
         $user->removeUser();
+        //remove tests
         $thrown = false;
         try{
             $user->getId();
@@ -67,6 +81,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
             $thrown = true;
         }
         $this->assertTrue($thrown);
+
     }
 
     public function testNewUser()
@@ -138,5 +153,65 @@ class UserTest extends \PHPUnit_Framework_TestCase
         }
         $user->removeUser();
         $this->assertTrue($thrown);
+    }
+
+    public function testUpdate()
+    {
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");;
+        $user2 = User::getUserById($usersManagement, $user->getId());
+        $dataO = $user->getUserInfo();
+        $dataO2 = $user2->getUserInfo();
+        //name
+        $user->updateName("y");
+        $data = $user->getUserInfo();
+        $this->assertEquals("y", $data['name']);
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals("y", $data2['name']);
+        $dataO['name'] = "y";
+        $dataO2['name'] = "y";
+        $this->assertEquals($dataO, $data);
+        $this->assertEquals($dataO2, $data2);
+        //email
+        $user->updateEmail("tt@tt.it");
+        $data = $user->getUserInfo();
+        $this->assertEquals("tt@tt.it", $data['email']);
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals("tt@tt.it", $data2['email']);
+        $dataO['email'] = "tt@tt.it";
+        $dataO2['email'] = "tt@tt.it";
+        $this->assertEquals($dataO, $data);
+        $this->assertEquals($dataO2, $data2);
+        //apiKey
+        $apiKey = md5(rand());
+        $user->updateApiKey($apiKey);
+        $data = $user->getUserInfo();
+        $this->assertEquals($apiKey, $data['api_key']);
+        $data2 = $user2->getUserInfo();
+        $this->assertEquals($apiKey, $data2['api_key']);
+        $dataO['api_key'] = $apiKey;
+        $dataO2['api_key'] = $apiKey;
+        $this->assertEquals($dataO, $data);
+        $this->assertEquals($dataO2, $data2);
+        $user->removeUser();
+
+    }
+
+    public function testPassword()
+    {
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");;
+        $this->assertTrue($user->checkPassword("gggg"));
+        $this->assertFalse($user->checkPassword("ggkg"));
+        $dataO = $user->getUserInfo();
+        $user->updatePassword("ggkg");
+        $this->assertFalse($user->checkPassword("gggg"));
+        $this->assertTrue($user->checkPassword("ggkg"));
+        $this->assertEquals($dataO, $user->getUserInfo());
+        $user->removeUser();
     }
 }
