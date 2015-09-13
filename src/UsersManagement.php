@@ -204,12 +204,18 @@ class UsersManagement
     }
 
     /**
-     * Get a list (array) of User instances, all users are taken. The list is not ordered
+     * Get a list (array) of User instances, all users are taken. The list is not ordered.
+     * For disabled users see the $disabled parameter
+     * @param bool $disabled if true all users are get, Even user disabled
      * @return User[]
      */
-    public function getUsers()
+    public function getUsers($disabled = true)
     {
-        $usersDb = $this->operations->getList("id", "1");
+        if($disabled)
+            $condition = "1";
+        else
+            $condition = "enabled IS TRUE";
+        $usersDb = $this->operations->getList("id", $condition);
         /* @var $users User[] */
         $users = array();
         foreach($usersDb as $value)

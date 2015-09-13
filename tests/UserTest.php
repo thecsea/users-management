@@ -160,7 +160,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $db = require(__DIR__."/config.php");
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
         $usersManagement = new UsersManagement($connection, $db['tables']['users']);
-        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");;
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
         $user2 = User::getUserById($usersManagement, $user->getId());
         $dataO = $user->getUserInfo();
         $dataO2 = $user2->getUserInfo();
@@ -204,7 +204,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $db = require(__DIR__."/config.php");
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
         $usersManagement = new UsersManagement($connection, $db['tables']['users']);
-        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");;
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
         $this->assertTrue($user->checkCorrectPassword("gggg"));
         $this->assertFalse($user->checkCorrectPassword("ggkg"));
         $dataO = $user->getUserInfo();
@@ -213,5 +213,60 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($user->checkCorrectPassword("ggkg"));
         $this->assertEquals($dataO, $user->getUserInfo());
         $user->removeUser();
+    }
+
+    public function testEnabled()
+    {
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
+        $data = $user->getUserInfo();
+        $this->assertTrue($user->isEnabled());
+        $this->assertTrue($data['enabled']);
+        $user->updateEnabled(false);
+        $data2 = $user->getUserInfo();
+        $data['enabled'] = false;
+        $this->assertFalse($data2['enabled']);
+        $this->assertFalse($user->isEnabled());
+        $this->assertEquals($data, $data2);
+        $user->removeUser();
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", "", false);
+        $this->assertFalse($user->isEnabled());
+        $user->removeUser();
+    }
+
+    public function testEquals()
+    {
+        $db = require(__DIR__."/config.php");
+        $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
+        $usersManagement = new UsersManagement($connection, $db['tables']['users']);
+        $connection2 = clone $connection;
+        $usersManagement2 = clone $usersManagement;
+        $usersManagement->setConnection($connection2);
+        $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
+
+        //clone
+        $user2 = clone $user;
+        $this->assertTrue($user->equals($user2));
+        $this->assertEquals($user, $user2);
+        $user2->setUsersManagement($usersManagement2);
+        $this->assertTrue($user->equals($user2));
+        $this->assertNotEquals($user, $user2);
+
+        //new same user
+        $user2 = User::getUserById($usersManagement, $user->getId());
+        $this->assertTrue($user->equals($user2));
+        $this->assertEquals($user, $user2);
+        $user2->setUsersManagement($usersManagement2);
+        $this->assertTrue($user->equals($user2));
+        $this->assertNotEquals($user, $user2);
+
+        //new user
+        $user2 = User::newUser($usersManagement, "t", "tt@hshh.it", "gggg");
+        $this->assertFalse($user->equals($user2));
+        $this->assertNotEquals($user, $user2);
+        $user->removeUser();
+        $user2->removeUser();
     }
 }

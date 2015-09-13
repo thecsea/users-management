@@ -74,8 +74,13 @@ class User
     {
         $data = $this->getUserInfo();
         $ret = "";
-        foreach($data as $key=>$value)
+        foreach($data as $key=>$value) {
+            if($value === true)
+                $value = "true";
+            else if($value === false)
+                $value = "false";
             $ret .= "$key: $value\n";
+        }
         return $ret;
     }
 
@@ -169,13 +174,14 @@ class User
      * @param String $name
      * @param String $email
      * @param String $password
-     * @param String $apiKey
+     * @param string $apiKey if empty the apiKey is created unique
+     * @param bool $enabled set the enabled value
      * @return User instance of the user
      * @throws UsersManagementException when user data are not corrected
      */
-    public static function newUser(UsersManagement $usersManagement, $name, $email, $password, $apiKey = "")
+    public static function newUser(UsersManagement $usersManagement, $name, $email, $password, $apiKey = "", $enabled = true)
     {
-        $id = self::insertUser($usersManagement, $name, $email, $password, $apiKey);
+        $id = self::insertUser($usersManagement, $name, $email, $password, $apiKey, $enabled);
         return self::getUserById($usersManagement, $id);
     }
 
@@ -187,14 +193,16 @@ class User
      * @param String $email
      * @param String $password
      * @param string $apiKey if empty the apiKey is created unique
+     * @param bool $enabled set the enabled value
      * @return int user id
      * @throws UsersManagementException when user data are not corrected
      */
-    private static function insertUser(UsersManagement $usersManagement, $name, $email, $password, $apiKey = ""){
+    private static function insertUser(UsersManagement $usersManagement, $name, $email, $password, $apiKey = "", $enabled = true){
         //sql check
         $name = $usersManagement->getConnection()->getEscapedString($name);
         $email = $usersManagement->getConnection()->getEscapedString($email);
         $password = $usersManagement->getConnection()->getEscapedString($password);
+        $enabled = $usersManagement->getConnection()->getEscapedString($enabled);
         $apiKey = $usersManagement->getConnection()->getEscapedString($apiKey);
 
         self::checkName($name);
@@ -203,7 +211,7 @@ class User
 
         //insert data
         try {
-            $usersManagement->getOperations()->insert("name, email, password, api_key", "'$name', '$email', '" . md5($password) . "', '$apiKey'");
+            $usersManagement->getOperations()->insert("name, email, password, api_key, enabled", "'$name', '$email', '" . md5($password) . "', '$apiKey', ".($enabled?1:0));
         }catch(MysqltcsException $e){
             throw new UsersManagementException("Mysql error during insert, please take a look to exception cause",0, $e);
         }
@@ -303,6 +311,8 @@ class User
         $this->checkUser();
         $ret = $this->usersManagement->getOperations()->getList("*, NULL as password", "id = ".$this->id);
         if($ret && isset($ret[0])){
+            if(isset($ret[0]['enabled']))
+                $ret[0]['enabled'] = ($ret[0]['enabled']!="0")?true:false;
             return $ret[0];
         }
         return $ret;
@@ -314,11 +324,46 @@ class User
      */
     public function isValid()
     {
-        //valid id
-        if($this->id && $this->usersManagement->getOperations()->getValue("id", "id = ".$this->id) == $this->id)
+        return $this->exists();
+    }
+
+    /**
+     * return true if the the user exists
+     * @return bool
+     */
+    private function exists(){
+        if($this->id && $this->usersManagement->getOperations()->getValue("id", "id = ".$this->id) == $this->id) {
             return true;
-        else
+        }else {
             return false;
+        }
+    }
+
+    /**
+     * return true if the the user is enabled
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        if($this->usersManagement->getOperations()->getValue("enabled", "id = ".$this->id) != 0) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * update enabled status in database
+     * @param boolean $enabled
+     * @throws UsersManagementException when an update error is occurred
+     */
+    public function updateEnabled($enabled)
+    {
+        $enabled = $this->usersManagement->getOperations()->getEscapedString($enabled);
+        $enabled = $enabled?1:0;
+
+        $this->update("enabled", $enabled);
+
     }
 
     /**
@@ -334,7 +379,7 @@ class User
     /**
      * update name
      * @param string $name
-     * @throws UsersManagementException when name is not valid or user is not valid
+     * @throws UsersManagementException when name is not valid or user is not valid or an update error is occurred
      */
     public function updateName($name)
     {
@@ -347,7 +392,7 @@ class User
     /**
      * update email
      * @param string $email
-     * @throws UsersManagementException when email is not valid or user is not valid
+     * @throws UsersManagementException when email is not valid or user is not valid or an update error is occurred
      */
     public function updateEmail($email)
     {
@@ -360,7 +405,7 @@ class User
     /**
      * Update password. CAUTION: the method already makes the md5 hash
      * @param string $password unencrypted password
-     * @throws UsersManagementException when password is not valid or user is not valid
+     * @throws UsersManagementException when password is not valid or user is not valid or an update error is occurred
      */
     public function updatePassword($password)
     {
@@ -372,7 +417,7 @@ class User
     /**
      * update apiKey
      * @param string $apiKey
-     * @throws UsersManagementException when apiKey is not valid or user is not valid
+     * @throws UsersManagementException when apiKey is not valid or user is not valid or an update error is occurred
      */
     public function updateApiKey($apiKey)
     {
@@ -413,5 +458,16 @@ class User
             return true;
         else
             return false;
+    }
+
+    /**
+     * return true if two user have the same userInfo. CAUTION if two user are the same userInfo but different
+     * usersMangement (so different connection or user table for example) the method return true, not false
+     * @param User $user
+     * @return bool
+     */
+    public function equals($user)
+    {
+        return ($this->getUserInfo() == $user->getUserInfo());
     }
 }

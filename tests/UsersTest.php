@@ -32,7 +32,7 @@ require_once(__DIR__."/../vendor/autoload.php");
  */
 class UsersTest extends \PHPUnit_Framework_TestCase
 {
-    public  function testGetUsers()
+    public function testGetUsers()
     {
         $db = require(__DIR__."/config.php");
         $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']);
@@ -50,6 +50,14 @@ class UsersTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($user->getUserInfo(),$users[1]->getUserInfo());
             $this->assertEquals($user2->getUserInfo(),$users[0]->getUserInfo());
         }
+        $this->assertEquals(2, count($usersManagement->getUsers(false)));
+        $user->updateEnabled(false);
+        $this->assertEquals(2, count($usersManagement->getUsers(true)));
+        $this->assertEquals(1, count($usersManagement->getUsers(false)));
+        $users = $usersManagement->getUsers(false);
+        $this->assertEquals($user2->getUserInfo(), $users[0]->getUserInfo());
+        $this->assertEquals($user2, $users[0]);
+        $this->assertTrue($user2->equals($users[0]));
         $user->removeUser();
         $user2->removeUser();
     }

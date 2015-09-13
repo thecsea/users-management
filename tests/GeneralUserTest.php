@@ -43,8 +43,13 @@ class GeneralUserTest extends \PHPUnit_Framework_TestCase
         $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg");
         $data = $user->getUserInfo();
         $expected = "";
-        foreach($data as $key=>$value)
+        foreach($data as $key=>$value) {
+            if($value === true)
+                $value = "true";
+            else if($value === false)
+                $value = "false";
             $expected .= "$key: $value\n";
+        }
         $this->assertEquals($expected, (string)$user);
         $user->removeUser();
     }
