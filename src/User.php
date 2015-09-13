@@ -311,8 +311,7 @@ class User
         $this->checkUser();
         $ret = $this->usersManagement->getOperations()->getList("*, NULL as password", "id = ".$this->id);
         if($ret && isset($ret[0])){
-            if(isset($ret[0]['enabled']))
-                $ret[0]['enabled'] = ($ret[0]['enabled']!="0")?true:false;
+            $ret[0]['enabled'] = ($ret[0]['enabled']!="0")?true:false;
             return $ret[0];
         }
         return $ret;
