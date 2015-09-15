@@ -302,7 +302,7 @@ class User
     }
 
     /**
-     * get user informations
+     * get user information
      * @return array
      * @throws UsersManagementException when user is not valid
      */
