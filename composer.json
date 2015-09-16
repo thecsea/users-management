@@ -1,7 +1,8 @@
 {
   "name": "thecsea/users-management",
   "type": "library",
-  "description": "description_text",
+  "keywords": ["users","management", "simple", "powerful", "customizable"],
+  "description": "The most powerful and the simplest library to add a customizable users management system",
   "homepage": "http://www.thecsea.it",
   "minimum-stability": "stable",
   "license": "GPL-2.0",
