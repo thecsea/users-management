@@ -10,6 +10,7 @@ The most powerful and the simplest library to add a customizable users managemen
 * Use a already enstablisehd database connection (mysqltcs connection)
 * ApiKey support
 * Enabled user support
+* extendable
 
 
 
