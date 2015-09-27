@@ -276,7 +276,7 @@ class User
     private static function checkId(UsersManagement $usersManagement, $id)
     {
         $id = $usersManagement->getConnection()->getEscapedString($id);
-        if($id == null || $id <=0 || $usersManagement->getOperations()->getValue("id", "id = $id") != $id)
+        if($id == null || !is_numeric($id) || $id <=0 || $usersManagement->getOperations()->getValue("id", "id = $id") != $id)
             throw new UsersManagementException("User is not valid");
     }
 
@@ -341,9 +341,11 @@ class User
     /**
      * return true if the the user is enabled
      * @return bool
+     * @throws UsersManagementException when user is not valid
      */
     public function isEnabled()
     {
+        $this->checkUser();
         if($this->usersManagement->getOperations()->getValue("enabled", "id = ".$this->id) != 0) {
             return true;
         }else{
@@ -355,9 +357,11 @@ class User
      * update enabled status in database
      * @param boolean $enabled
      * @throws UsersManagementException when an update error is occurred
+     * @throws UsersManagementException when user is not valid
      */
     public function updateEnabled($enabled)
     {
+        $this->checkUser();
         $enabled = $this->usersManagement->getOperations()->getEscapedString($enabled);
         $enabled = $enabled?1:0;
 
@@ -464,9 +468,11 @@ class User
      * usersMangement (so different connection or user table for example) the method return true, not false
      * @param User $user
      * @return bool
+     * @throws UsersManagementException when user is not valid
      */
-    public function equals($user)
+    public function equals(User $user)
     {
+        $this->checkUser();
         return ($this->getUserInfo() == $user->getUserInfo());
     }
 }

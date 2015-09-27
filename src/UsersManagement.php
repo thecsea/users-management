@@ -55,6 +55,7 @@ class UsersManagement
     public function __construct(Mysqltcs $connection, $usersTable)
     {
         $this->connection = $connection;
+        $usersTable = $connection->getEscapedString($usersTable);
         $this->usersTable = $usersTable;
 
         self::connectionCheck($connection);
@@ -157,6 +158,7 @@ class UsersManagement
      */
     public function setUsersTable($usersTable)
     {
+        $usersTable = $this->connection->getEscapedString($usersTable);
         $this->usersTable = $usersTable;
         self::usersTableCheck($this->connection, $usersTable);
         $this->operations->setDefaultFrom($usersTable);
