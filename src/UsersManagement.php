@@ -121,6 +121,7 @@ class UsersManagement
      */
     public function getConnection()
     {
+        //DON'T clone to keep mysql connection number efficient
         return $this->connection;
     }
 

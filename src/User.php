@@ -276,7 +276,7 @@ class User
     private static function checkId(UsersManagement $usersManagement, $id)
     {
         $id = $usersManagement->getConnection()->getEscapedString($id);
-        if($id == null || !is_numeric($id) || $id <=0 || $usersManagement->getOperations()->getValue("id", "id = $id") != $id)
+        if(!is_numeric($id) || $id <=0 || $usersManagement->getOperations()->getValue("id", "id = $id") != $id)
             throw new UsersManagementException("User is not valid");
     }
 
@@ -364,7 +364,6 @@ class User
         $this->checkUser();
         $enabled = $this->usersManagement->getOperations()->getEscapedString($enabled);
         $enabled = $enabled?1:0;
-
         $this->update("enabled", $enabled);
 
     }
