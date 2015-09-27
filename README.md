@@ -59,7 +59,10 @@ You have to import the sql structure `tests/usersManagement.sql`
 ##Simple example
 
     <?php
+    require_once(__DIR__."/vendor/autoload.php"); //composer autoload
     $db = require(__DIR__."/config.php");
+    use it\thecsea\mysqltcs\Mysqltcs;
+    use it\thecsea\musers_management\UsersManagement;
     $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']); //myslqtcs connection
     $usersManagement = new UsersManagement($connection, $db['tables']['users']); //environment
     $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg"); //new user, already inserted in db
@@ -67,6 +70,10 @@ You have to import the sql structure `tests/usersManagement.sql`
     $users = $usersManagement->getUsers(); //get list of users
     print_r($users[0]->getUserInfo()); //print user info (associative matrix) 
     ?>
+
+N.B. config.php is a file that contains the mysql connection data as array.
+
+**N.B. you have to include composer autoload to use the library**
     
 ##How it works
 This library is fully object oriented so you have tostring, equals (user), clone and so on
