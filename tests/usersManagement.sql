@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+-- 'unique key' is subset of 'key' so it adds the same efficiency in the select clauses
 ALTER TABLE `users`
 ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `api_key` (`api_key`), ADD UNIQUE KEY `email` (`email`);
 
