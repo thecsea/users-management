@@ -60,7 +60,7 @@ You have to import the sql structure `tests/usersManagement.sql`
 
     <?php
     require_once(__DIR__."/vendor/autoload.php"); //composer autoload
-    $db = require(__DIR__."/config.php");
+    $db = require(__DIR__."/config.php"); //connection data as array
     use it\thecsea\mysqltcs\Mysqltcs;
     use it\thecsea\musers_management\UsersManagement;
     $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']); //myslqtcs connection
