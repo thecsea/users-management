@@ -101,4 +101,8 @@ You can obviously access to db, but we suggest to don't modify the structure.
 This library is tested, you can find tests under `tests`, coverage: [![Code Coverage](https://scrutinizer-ci.com/g/thecsea/users-management/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/thecsea/users-management/?branch=master)
 
 
+# Credits
+* [Mysqltcs](https://github.com/thecsea/mysqltcs): php library to connect to a mysql database
+
+
 # By [thecsea.it](http://www.thecsea.it)
