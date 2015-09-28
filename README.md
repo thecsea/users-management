@@ -7,9 +7,10 @@ The most powerful and the simplest library to add a customizable users managemen
 * Object oriented: every user is an object
 * Very simply, only two object: User (single user) and UsersManagement (environment)
 * Integrated with [mysqltcs](https://github.com/thecsea/mysqltcs)
-* Use a already enstablisehd database connection (mysqltcs connection)
+* Use an already established database connection (mysqltcs connection)
 * ApiKey support
 * Enabled user support
+* Extendable
 
 
 
