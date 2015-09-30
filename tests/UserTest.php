@@ -134,7 +134,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         //correct apiKey
         $thrown = false;
         try{
-            $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", md5(rand()));
+            $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", $usersManagement->hash(rand()));
             $user->removeUser();
         }catch(UsersManagementException $e)
         {
@@ -143,7 +143,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($thrown);
         //apiKey already taken
         $thrown = false;
-        $apiKey = md5(rand());
+        $apiKey = $usersManagement->hash(rand());
         $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg", $apiKey);
         try{
             User::newUser($usersManagement, "t", "tt@hhh.it2", "gggg", $apiKey);
@@ -185,7 +185,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($dataO, $data);
         $this->assertEquals($dataO2, $data2);
         //apiKey
-        $apiKey = md5(rand());
+        $apiKey = $usersManagement->hash(rand());
         $user->updateApiKey($apiKey);
         $data = $user->getUserInfo();
         $this->assertEquals($apiKey, $data['api_key']);

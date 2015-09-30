@@ -211,7 +211,7 @@ class User
 
         //insert data
         try {
-            $usersManagement->getOperations()->insert("name, email, password, api_key, enabled", "'$name', '$email', '" . md5($password) . "', '$apiKey', ".($enabled?1:0));
+            $usersManagement->getOperations()->insert("name, email, password, api_key, enabled", "'$name', '$email', '" . $usersManagement->encrypt($password) . "', '$apiKey', ".($enabled?1:0));
         }catch(MysqltcsException $e){
             throw new UsersManagementException("Mysql error during insert, please take a look to exception cause",0, $e);
         }
@@ -258,8 +258,8 @@ class User
     {
         if($apiKey == "") {
            return $usersManagement->createApiKey();
-        }else if(strlen($apiKey) != 32) {
-            throw new UsersManagementException("ApiKey's length is not correct (32 is the correct length)");
+        }else if(strlen($apiKey) != 64) {
+            throw new UsersManagementException("ApiKey's length is not correct (64 is the correct length)");
         }else if($usersManagement->getOperations()->getValue("id", "api_key = '$apiKey'")) {
             throw new UsersManagementException("ApiKey chosen is already taken");
         }
@@ -405,7 +405,7 @@ class User
     }
 
     /**
-     * Update password. CAUTION: the method already makes the md5 hash
+     * Update password. CAUTION: the method already makes the md5 hash (using salt)
      * @param string $password unencrypted password
      * @throws UsersManagementException when password is not valid or user is not valid or an update error is occurred
      */
@@ -413,7 +413,7 @@ class User
     {
         $this->checkUser();
         $password = $this->usersManagement->getOperations()->getEscapedString($password);
-        $this->update("password", md5($password));
+        $this->update("password", $this->usersManagement->encrypt($password));
     }
 
     /**
@@ -446,7 +446,7 @@ class User
 
 
     /**
-     * Check if the password passed is correct. CAUTION: the method already makes the md5 hash
+     * Check if the password passed is correct. CAUTION: the method already makes the md5 hash (using salt)
      * @param string $password unencrypted password
      * @return bool true if the password is correct, else false
      * @throws UsersManagementException when user is not valid
@@ -456,7 +456,7 @@ class User
         $this->checkUser();
         $password = $this->usersManagement->getOperations()->getEscapedString($password);
         $passwordDb = $this->usersManagement->getOperations()->getValue("password", "id = ".$this->id);
-        if($passwordDb == md5($password))
+        if($passwordDb == $this->usersManagement->encrypt($password))
             return true;
         else
             return false;

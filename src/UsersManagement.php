@@ -48,15 +48,22 @@ class UsersManagement
     private $operations;
 
     /**
+     * @var string
+     */
+    private $salt;
+
+    /**
      * @param Mysqltcs $connection a valid and connected instance of Mysqltcs
      * @param String $usersTable users table name
+     * @param String $salt the salt used for encrypt the password
      * @throws UsersManagementException on connection errors
      */
-    public function __construct(Mysqltcs $connection, $usersTable)
+    public function __construct(Mysqltcs $connection, $usersTable, $salt = "thecsea")
     {
         $this->connection = $connection;
         $usersTable = $connection->getEscapedString($usersTable);
         $this->usersTable = $usersTable;
+        $this->salt = $salt;
 
         self::connectionCheck($connection);
         self::usersTableCheck($connection, $usersTable);
@@ -99,6 +106,21 @@ class UsersManagement
         }
     }
 
+    /**
+     * @return string
+     */
+    public function getSalt()
+    {
+        return $this->salt;
+    }
+
+    /**
+     * @param string $salt
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
+    }
 
     /**
      * This entails that you can clone every instance of this class
@@ -173,9 +195,29 @@ class UsersManagement
     public function createApiKey()
     {
         do{
-            $key = md5(rand());
+            $key = $this->hash(rand());
         }while($this->operations->getValue("id","api_key = '$key'"));
         return $key;
+    }
+
+    /**
+     * encrypt a password using internal salt
+     * @param string $psw
+     * @return string
+     */
+    public function encrypt($psw)
+    {
+        return $this->hash($this->salt.$this->hash($this->salt.$psw));
+    }
+
+    /**
+     * return the hash of the value passed
+     * @param $str
+     * @return string
+     */
+    public function hash($str)
+    {
+        return hash("sha256",$str);
     }
 
     /**

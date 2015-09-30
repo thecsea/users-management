@@ -10,7 +10,8 @@ The most powerful and the simplest library to add a customizable users managemen
 * Use an already established database connection (mysqltcs connection)
 * ApiKey support
 * Enabled user support
-* Extendable
+* Salt support (more security)
+* Expendable
 
 
 
@@ -66,7 +67,7 @@ You have to import the sql structure `tests/usersManagement.sql`
     use it\thecsea\users_management\UsersManagement;
     use it\thecsea\users_management\User;
     $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']); //myslqtcs connection
-    $usersManagement = new UsersManagement($connection, $db['tables']['users']); //environment
+    $usersManagement = new UsersManagement($connection, $db['tables']['users'], "salt"); //environment
     $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg"); //new user, already inserted in db
     $user2 = User::getUserByLogin($usersManagement, "tt@hhh.it", "gggg"); //LOGIN get user checking password
     $users = $usersManagement->getUsers(); //get list of users
@@ -84,10 +85,13 @@ This library is fully object oriented so you have tostring, equals (user), clone
 This library use exception to show error, every method can throw two exception:
 
 * `UsersManagementException` thrown on logic error (for example wrong password)
-* `Mysqltcsexception` thrown on myslq error (for example db permission problem)
+* `Mysqltcsexception` thrown on mysql error (for example db permission problem)
 
 ###Methods and documentation
-The ueser contains other useful method, you can see how to use method looking the phpdoc
+The user contains other useful method, you can see how to use method looking the phpdoc
+
+###Salt
+This library has support to salt, for more security, you can specify it via construct or via setter, or you can ignore it and use the default salt "thecsea"
 
 ###Extra features
 This library include extra features like apiKey string and enabled flag for each user, you can use these information as you want, this class provide only the insert and update methods for these information

@@ -97,6 +97,21 @@ class GeneralTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($thrown);
         $this->assertEquals($db['tables']['users'], $usersManagement->getUsersTable());
         $this->assertEquals($db['tables']['users'], $usersManagement->getOperations()->getDefaultFrom());
+        $this->assertEquals("thecsea",$usersManagement->getSalt());
+        $usersManagement->setSalt("test");
+        $this->assertEquals("test",$usersManagement->getSalt());
+        $psw1 = $usersManagement->encrypt("psw");
+        $usersManagement = new UsersManagement($connection, $db['tables']['users'], "test2");
+        $this->assertEquals("test2",$usersManagement->getSalt());
+        $psw2 = $usersManagement->encrypt("psw");
+        $this->assertNotEquals($psw1, $psw2);
+        $this->assertNotEquals($psw1, $usersManagement->hash("psw"));
+        $this->assertNotEquals($psw2, $usersManagement->hash("psw"));
+        $this->assertNotEquals($psw2, $usersManagement->hash($usersManagement->hash("psw")));
+        $usersManagement->setSalt("");
+        $psw3 = $usersManagement->encrypt("psw");
+        $this->assertNotEquals($psw3, $psw2);
+        $this->assertEquals($usersManagement->hash($usersManagement->hash("psw")), $psw3);
     }
 
     public function testClone()
