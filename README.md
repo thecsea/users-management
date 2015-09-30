@@ -64,6 +64,7 @@ You have to import the sql structure `tests/usersManagement.sql`
     $db = require(__DIR__."/config.php"); //mysql connection data as array
     use it\thecsea\mysqltcs\Mysqltcs;
     use it\thecsea\users_management\UsersManagement;
+    use it\thecsea\users_management\User;
     $connection = new Mysqltcs($db['host'],  $db['user'], $db['psw'], $db['db']); //myslqtcs connection
     $usersManagement = new UsersManagement($connection, $db['tables']['users']); //environment
     $user = User::newUser($usersManagement, "t", "tt@hhh.it", "gggg"); //new user, already inserted in db
