@@ -207,7 +207,7 @@ class UsersManagement
      */
     public function encrypt($psw)
     {
-        return $this->hash($this->salt.$this->hash($this->salt.$psw));
+        return $this->hash($this->salt.$psw);
     }
 
     /**

@@ -107,11 +107,10 @@ class GeneralTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals($psw1, $psw2);
         $this->assertNotEquals($psw1, $usersManagement->hash("psw"));
         $this->assertNotEquals($psw2, $usersManagement->hash("psw"));
-        $this->assertNotEquals($psw2, $usersManagement->hash($usersManagement->hash("psw")));
         $usersManagement->setSalt("");
         $psw3 = $usersManagement->encrypt("psw");
         $this->assertNotEquals($psw3, $psw2);
-        $this->assertEquals($usersManagement->hash($usersManagement->hash("psw")), $psw3);
+        $this->assertEquals($usersManagement->hash("psw"), $psw3);
     }
 
     public function testClone()
